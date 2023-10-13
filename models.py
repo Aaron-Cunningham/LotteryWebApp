@@ -16,17 +16,21 @@ class User(db.Model, UserMixin):
     lastname = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(100), nullable=False)
     role = db.Column(db.String(100), nullable=False, default='user')
+    postcode = db.Column(db.String(100), nullable=False)
+    dateofbirth = db.Column(db.String(100), nullable=False)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
 
-    def __init__(self, email, firstname, lastname, phone, password, role):
+    def __init__(self, email, firstname, lastname, phone, password, dateofbirth, postcode, role):
         self.email = email
         self.firstname = firstname
         self.lastname = lastname
         self.phone = phone
         self.password = password
         self.role = role
+        self.dateofbirth = dateofbirth
+        self.postcode = postcode
 
 
 class Draw(db.Model):
@@ -70,7 +74,9 @@ def init_db():
                      firstname='Alice',
                      lastname='Jones',
                      phone='0191-123-4567',
-                     role='admin')
+                     role='admin',
+                     dateofbirth='01/01/1999',
+                     postcode='NE4 5SA')
 
         db.session.add(admin)
         db.session.commit()
