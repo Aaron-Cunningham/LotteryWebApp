@@ -6,3 +6,5 @@ flask_wtf
 WTForms
 pyotp
 flask-qrcode
+email-validator
+
