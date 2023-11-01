@@ -1,7 +1,10 @@
+import bcrypt
 import pyotp
-
+from flask import request
+from cryptography.fernet import Fernet
 from app import db, app
 from flask_login import UserMixin
+from datetime import datetime
 
 
 class User(db.Model, UserMixin):
@@ -11,7 +14,7 @@ class User(db.Model, UserMixin):
 
     # User authentication information.
     email = db.Column(db.String(100), nullable=False, unique=True)
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(10000), nullable=False)
     pin_key = db.Column(db.String(32), nullable=False, default=pyotp.random_base32())
 
     # User information
@@ -21,6 +24,12 @@ class User(db.Model, UserMixin):
     role = db.Column(db.String(100), nullable=False, default='user')
     postcode = db.Column(db.String(100), nullable=False)
     dateofbirth = db.Column(db.String(100), nullable=False)
+    registered_on = db.Column(db.DateTime, nullable=False)
+    current_login = db.Column(db.DateTime, nullable=True)
+    last_login = db.Column(db.DateTime, nullable=True)
+    current_ip_login = db.Column(db.String(100), nullable=True)
+    last_ip_login = db.Column(db.String(100), nullable=True)
+    successful_logins = db.Column(db.Integer, nullable=True, default=0)
 
     # Define the relationship to Draw
     draws = db.relationship('Draw')
@@ -30,15 +39,25 @@ class User(db.Model, UserMixin):
         self.firstname = firstname
         self.lastname = lastname
         self.phone = phone
-        self.password = password
+        self.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
         self.role = role
         self.dateofbirth = dateofbirth
         self.postcode = postcode
         self.pin_key = pin_key
-
+        self.registered_on = datetime.now()
+        self.current_login = None
+        self.last_login = None
+        self.last_ip_login = None
+        self.current_ip_login = None
+        self.successful_logins = None
 
     def verify_password(self, password):
-        return self.password == password
+        return bcrypt.checkpw(password.encode('utf-8'), self.password)
+
+    # Used to log in by checking postcode entered is the same stored in DB
+    def verify_postcode(self, postcode):
+        return self.postcode == postcode
+
 
     def verify_pin(self, pin):
         return pyotp.TOTP(self.pin_key).verify(pin)
@@ -48,7 +67,6 @@ class User(db.Model, UserMixin):
             name=self.email,
             issuer_name='CSC2031 Blog')
         )
-
 
 
 class Draw(db.Model):
@@ -97,5 +115,16 @@ def init_db():
                      dateofbirth='01/01/1999',
                      postcode='NE4 5SA')
 
+        user1 = User(email='test@test.com',
+                     password='Test1234!',
+                     pin_key='IXE547QYEYRNDHO5TZD7RBM67ONEDJDC',
+                     firstname='Aaron',
+                     lastname='Cunningham',
+                     phone='4444-444-4444',
+                     role='user',
+                     dateofbirth='29/01/1999',
+                     postcode='NE4 5SA')
+
         db.session.add(admin)
+        db.session.add(user1)
         db.session.commit()
