@@ -11,3 +11,4 @@ datetime
 bcrypt
 Fernet
 cryptography
+python-dotenv
