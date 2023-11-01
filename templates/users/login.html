@@ -34,6 +34,16 @@
     </div>
     <div class="field">
     {{ form.csrf_token() }}
+        <div class="control">
+        {{ form.postcode(class="input", placeholder="Postcode") }}
+        {% for error in form.postcode.errors %}
+        {{ error }}
+        {% endfor %}
+    </div>
+    </div>
+
+    <div class="field">
+    {{ form.csrf_token() }}
     <div class="control">
         {{ form.pin(class="input", placeholder="Pin") }}
         {% for error in form.pin.errors %}
