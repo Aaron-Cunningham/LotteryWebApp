@@ -8,4 +8,4 @@ pyotp
 flask-qrcode
 email-validator
 datetime
-
+bcrypt
