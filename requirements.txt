@@ -9,3 +9,5 @@ flask-qrcode
 email-validator
 datetime
 bcrypt
+Fernet
+cryptography
