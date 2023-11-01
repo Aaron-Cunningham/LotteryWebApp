@@ -126,4 +126,71 @@
     </div>
 
 
+
+
+<div class="column is-10 is-offset-1">
+
+
+    <h4 class="title is-4">User Activity Logs</h4>
+    <div class="box">
+        {% if current_users_activity %}
+            <div class="field">
+                <table class="table">
+                    <tr>
+                        <th>ID</th>
+                        <th>Email</th>
+                        <th>Registration date and time</th>
+                        <th>Current log in date and time</th>
+                        <th>Previous log in date and time</th>
+                        <th>IP of current successful log in request</th>
+                        <th>IP of previous successful log in request</th>
+                        <th>Count of successful log ins</th>
+
+                    </tr>
+                    {% for user in current_users_activity %}
+                        <tr>
+                            <td>{{ user.id }}</td>
+                            <td>{{ user.email }}</td>
+                            <td>{{ user.registered_on }}</td>
+                            <td>{{ user.current_login }}</td>
+                            <td>{{ user.last_login }}</td>
+                            <td>{{ user.current_ip_login }}</td>
+                            <td>{{ user.last_ip_login }}</td>
+                            <td>{{ user.successful_logins }}</td>
+                        </tr>
+                    {% endfor %}
+                </table>
+            </div>
+        {% endif %}
+        <form method="POST" action="/view_user_activity">
+            <div>
+                <button class="button is-info is-centered">View User Activity</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="column is-10 is-offset-1">
+
+
+    <h4 class="title is-4">Register Admin</h4>
+    <div class="box">
+
+            <div class="field">
+                <table class="table">
+
+
+
+
+                </table>
+            </div>
+        <form method="POST">
+            <div>
+                <button class="button is-info is-centered"><a href="{{ url_for('users.admin_register') }}">Register Admin</a></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 {% endblock %}
