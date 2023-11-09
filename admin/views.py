@@ -1,6 +1,7 @@
 # IMPORTS
 import random
 from flask import Blueprint, render_template, flash, redirect, url_for
+from sqlalchemy.orm import make_transient
 
 from app import db, requires_roles
 from models import User, Draw
@@ -21,14 +22,12 @@ def admin():
     return render_template('admin/admin.html', name=current_user.firstname)
 
 
-
 # create a new winning draw
 @admin_blueprint.route('/generate_winning_draw', methods=['POST'])
 @admin_blueprint.route('/admin')
 @login_required
 @requires_roles('admin')
 def generate_winning_draw():
-
     # get current winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True).first()
     lottery_round = 1
@@ -51,7 +50,8 @@ def generate_winning_draw():
     winning_numbers_string = winning_numbers_string[:-1]
 
     # create a new draw object.
-    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True, lottery_round=lottery_round)
+    new_winning_draw = Draw(user_id=current_user.id, numbers=winning_numbers_string, master_draw=True,
+                            lottery_round=lottery_round, lottery_key=current_user.lottery_key)
 
     # add the new winning draw to the database
     db.session.add(new_winning_draw)
@@ -68,12 +68,16 @@ def generate_winning_draw():
 @login_required
 @requires_roles('admin')
 def view_winning_draw():
-
     # get winning draw from DB
-    current_winning_draw = Draw.query.filter_by(master_draw=True,been_played=False).first()
+    current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
     # if a winning draw exists
     if current_winning_draw:
+        # for every current winning draw, decrypt and view
+        for c in current_winning_draw:
+            make_transient(c)
+            c.view_numbers(current_user.lottery_key)
+
         # re-render admin page with current winning draw and lottery round
         return render_template('admin/admin.html', winning_draw=current_winning_draw, name=current_user.firstname)
 
@@ -88,12 +92,13 @@ def view_winning_draw():
 @login_required
 @requires_roles('admin')
 def run_lottery():
-
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
 
     # if current unplayed winning draw exists
     if current_winning_draw:
+        # decrypt current winning draw
+        current_winning_draw.view_numbers(current_user.lottery_key)
 
         # get all unplayed user draws
         user_draws = Draw.query.filter_by(master_draw=False, been_played=False).all()
@@ -112,10 +117,11 @@ def run_lottery():
 
                 # get the owning user (instance/object)
                 user = User.query.filter_by(id=draw.user_id).first()
+                # Decrypt user numbers
+                draw.view_numbers(user.lottery_key)
 
                 # if user draw matches current unplayed winning draw
                 if draw.numbers == current_winning_draw.numbers:
-
                     # add details of winner to list of results
                     results.append((current_winning_draw.lottery_round, draw.numbers, draw.user_id, user.email))
 
@@ -165,7 +171,8 @@ def view_all_users():
 def view_user_activity():
     current_users_activity = User.query.filter_by(role='user').all()
 
-    return render_template('admin/admin.html', name=current_user.firstname, current_users_activity=current_users_activity)
+    return render_template('admin/admin.html', name=current_user.firstname,
+                           current_users_activity=current_users_activity)
 
 
 # view last 10 log entries
