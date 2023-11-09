@@ -6,6 +6,14 @@ from app import db, app
 from flask_login import UserMixin
 from datetime import datetime
 
+# Method used to encrypt the lottery_key
+def encrypt(data, lottery_key):
+    return Fernet(lottery_key).encrypt(bytes(data, 'utf-8'))
+
+# Method to decrypt the lottery_key
+def decrypt(data, lottery_key):
+    return Fernet(lottery_key).decrypt(data).decode('utf-8')
+
 
 class User(db.Model, UserMixin):
     __tablename__ = 'users'
@@ -16,6 +24,7 @@ class User(db.Model, UserMixin):
     email = db.Column(db.String(100), nullable=False, unique=True)
     password = db.Column(db.String(10000), nullable=False)
     pin_key = db.Column(db.String(32), nullable=False, default=pyotp.random_base32())
+    lottery_key = db.Column(db.BLOB, nullable=False)
 
     # User information
     firstname = db.Column(db.String(100), nullable=False)
@@ -50,18 +59,21 @@ class User(db.Model, UserMixin):
         self.last_ip_login = None
         self.current_ip_login = None
         self.successful_logins = None
+        self.lottery_key = Fernet.generate_key()
 
+    # Verifies the password is correct
     def verify_password(self, password):
         return bcrypt.checkpw(password.encode('utf-8'), self.password)
 
-    # Used to log in by checking postcode entered is the same stored in DB
+    # Used to log in by checking postcode entered is the same stored in Database
     def verify_postcode(self, postcode):
         return self.postcode == postcode
 
-
+    # Verifies the pin the user inputs and compares to pin_key
     def verify_pin(self, pin):
         return pyotp.TOTP(self.pin_key).verify(pin)
 
+    #
     def get_2fa_uri(self):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
             name=self.email,
@@ -92,13 +104,18 @@ class Draw(db.Model):
     # Lottery round that draw is used
     lottery_round = db.Column(db.Integer, nullable=False, default=0)
 
-    def __init__(self, user_id, numbers, master_draw, lottery_round):
+    def __init__(self, user_id, numbers, master_draw, lottery_round, lottery_key):
         self.user_id = user_id
-        self.numbers = numbers
+        # Encrypts the numbers on initilisation
+        self.numbers = encrypt(numbers, lottery_key)
         self.been_played = False
         self.matches_master = False
         self.master_draw = master_draw
         self.lottery_round = lottery_round
+
+    # This will decrypt the numbers
+    def view_numbers(self, lottery_key):
+        self.numbers = decrypt(self.numbers, lottery_key)
 
 
 def init_db():
