@@ -90,8 +90,8 @@ def register():
         # add the new user to the database
         db.session.add(new_user)
         db.session.commit()
-        logging.warning('SECURITY - User Registered [%s, %s]', form.email.data, request.remote_addr)
         # Logs when a user registered
+        logging.warning('SECURITY - User Registered [%s, %s]', form.email.data, request.remote_addr)
         session['email'] = new_user.email
         # Redirects so user can set up 2FA
         return redirect(url_for('users.setup_2fa'))
@@ -105,6 +105,7 @@ def login():
     # Prevents users already logged in from accessing
     if current_user.is_authenticated:
         flash("This account is already logged in")
+        # Returns back to lottery page
         return redirect(url_for('lottery.lottery'))
     form = LoginForm()
 
@@ -192,7 +193,9 @@ def account():
 @users_blueprint.route('/logout')
 @login_required
 def logout():
+    # Logs when a user logs out
     logging.warning('SECURITY - User log out [%s, %s, %s]', current_user.id, current_user.email, request.remote_addr)
+
     logout_user()
     return render_template('main/index.html')
 
