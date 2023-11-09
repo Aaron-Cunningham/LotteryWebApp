@@ -12,3 +12,4 @@ bcrypt
 Fernet
 cryptography
 python-dotenv
+Flask-Talisman
