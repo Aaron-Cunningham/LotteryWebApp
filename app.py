@@ -2,7 +2,7 @@
 import logging
 import os
 from functools import wraps
-
+from flask_talisman import Talisman
 from flask import Flask, render_template, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, current_user
@@ -18,15 +18,36 @@ app.config['RECAPTCHA_PUBLIC_KEY'] = os.getenv('RECAPTCHA_PUBLIC_KEY')
 app.config['RECAPTCHA_PRIVATE_KEY'] = os.getenv('RECAPTCHA_PRIVATE_KEY')
 # initialise database
 db = SQLAlchemy(app)
-qrcode = QRcode(app)
+# initialise security headers
 
+# initialise QR code
+qrcode = QRcode(app)
+# Security header
+csp = {
+    'default-src': [
+        '\'self\'',
+        'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css'
+    ],
+    'frame-src': [
+        '\'self\'',
+        'https://www.google.com/recaptcha/',
+        'https://recaptcha.google.com/recaptcha/'
+    ],
+    'script-src': [
+        '\'self\'',
+        '\'unsafe-inline\'',
+        'https://www.google.com/recaptcha/',
+        'https://www.gstatic.com/recaptcha/'
+    ]
+}
+talisman = Talisman(app, content_security_policy=csp)
 
 # Logging
 class SecurityFilter(logging.Filter):
     def filter(self, record):
         return 'SECURITY' in record.getMessage()
 
-
+# File handler setup
 file_handler = logging.FileHandler('lottery.log', 'a')
 file_handler.setLevel(logging.WARNING)
 file_handler.addFilter(SecurityFilter())
@@ -66,7 +87,7 @@ from users.views import users_blueprint
 from admin.views import admin_blueprint
 from lottery.views import lottery_blueprint
 
-#
+
 # # register blueprints with app
 app.register_blueprint(users_blueprint)
 app.register_blueprint(admin_blueprint)
@@ -79,36 +100,29 @@ login_manager.init_app(app)
 
 from models import User
 
-
+# Searches database for a user with same ID
 @login_manager.user_loader
 def load_user(id):
     return User.query.get(int(id))
 
-
+# Error pages
 @app.errorhandler(400)
 def internal_error(error):
     return render_template('errors/400.html'), 400
-
-
 @app.errorhandler(403)
 def internal_error(error):
     return render_template('errors/403.html'), 403
-
-
 @app.errorhandler(404)
 def internal_error(error):
     return render_template('errors/500.html'), 404
-
-
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('errors/404.html'), 500
-
-
 @app.errorhandler(503)
 def internal_error(error):
     return render_template('errors/404.html'), 503
 
 
 if __name__ == "__main__":
-    app.run()
+    # If doesn't work add '--cert=cert.pem --key=key.pem' in Edit configuration/Additional options
+    app.run(ssl_context=('cert.pem', 'key.pem'))
