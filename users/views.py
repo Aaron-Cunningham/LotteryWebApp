@@ -58,12 +58,18 @@ def admin_register():
 
 # VIEWS
 # view registration
+
 @users_blueprint.route('/register', methods=['GET', 'POST'])
 def register():
     # Prevents users already registered and logged in from accessing
     if current_user.is_authenticated:
-        flash("This account is already registered")
-        return redirect(url_for('lottery.lottery'))
+        if current_user.role == 'admin':
+            flash("This account is already registered")
+            return redirect(url_for('admin.admin'))
+        elif current_user.role == 'user':
+            flash("This account is already registered")
+            return redirect(url_for('lottery.lottery'))
+
     # create signup form object
     form = RegisterForm()
 
@@ -103,10 +109,14 @@ def register():
 @users_blueprint.route('/login', methods=['GET', 'POST'])
 def login():
     # Prevents users already logged in from accessing
+    # Prevents users already registered and logged in from accessing
     if current_user.is_authenticated:
-        flash("This account is already logged in")
-        # Returns back to lottery page
-        return redirect(url_for('lottery.lottery'))
+        if current_user.role == 'admin':
+            flash("This account is already logged in")
+            return redirect(url_for('admin.admin'))
+        elif current_user.role == 'user':
+            flash("This account is already logged in")
+            return redirect(url_for('lottery.lottery'))
     form = LoginForm()
 
     if not session.get('authentication_attempts'):
