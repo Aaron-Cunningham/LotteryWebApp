@@ -13,3 +13,4 @@ Fernet
 cryptography
 python-dotenv
 Flask-Talisman
+dotenv
