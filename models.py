@@ -77,7 +77,7 @@ class User(db.Model, UserMixin):
     def get_2fa_uri(self):
         return str(pyotp.totp.TOTP(self.pin_key).provisioning_uri(
             name=self.email,
-            issuer_name='CSC2031 Blog')
+            issuer_name='LotteryWebApp')
         )
 
 
@@ -131,17 +131,5 @@ def init_db():
                      role='admin',
                      dateofbirth='01/01/1999',
                      postcode='NE4 5SA')
-
-        user1 = User(email='test@test.com',
-                     password='Test1234!',
-                     pin_key='IXE547QYEYRNDHO5TZD7RBM67ONEDJDC',
-                     firstname='Aaron',
-                     lastname='Cunningham',
-                     phone='4444-444-4444',
-                     role='user',
-                     dateofbirth='29/01/1999',
-                     postcode='NE4 5SA')
-
         db.session.add(admin)
-        db.session.add(user1)
         db.session.commit()

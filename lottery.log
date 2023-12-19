@@ -1,0 +1,5 @@
+12/14/2023 02:30:39 PM : SECURITY - User Login [1, admin@email.com, 127.0.0.1]
+12/14/2023 02:31:53 PM : SECURITY - Admin Registered [admin1@email.com, 127.0.0.1]
+12/14/2023 02:33:04 PM : SECURITY - User log out [1, admin@email.com, 127.0.0.1]
+12/14/2023 02:33:26 PM : SECURITY - User Registered [user@user.com, 127.0.0.1]
+12/14/2023 02:34:04 PM : SECURITY - User Login [3, user@user.com, 127.0.0.1]
