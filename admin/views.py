@@ -176,7 +176,7 @@ def view_user_activity():
 
 
 # view last 10 log entries
-@admin_blueprint.route('/logs', methods=['POST'])
+"""@admin_blueprint.route('/logs', methods=['POST'])
 @admin_blueprint.route('/admin')
 @login_required
 @requires_roles('admin')
@@ -185,4 +185,4 @@ def logs():
         content = f.read().splitlines()[-10:]
         content.reverse()
 
-    return render_template('admin/admin.html', logs=content, name=current_user.firstname)
+    return render_template('admin/admin.html', logs=content, name=current_user.firstname)"""
