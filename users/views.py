@@ -122,10 +122,12 @@ def login():
     if not session.get('authentication_attempts'):
         session['authentication_attempts'] = 0
 
+        #user.verify_pin(form.pin.data) or not
+
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         # Checks password and pin matches what's in the database
-        if not user or not user.verify_password(form.password.data) or not user.verify_pin(form.pin.data) or not user.verify_postcode(form.postcode.data):
+        if not user or not user.verify_password(form.password.data) or not user.verify_postcode(form.postcode.data):
             # If incorrect data entered will add 1 to authentication attempts
             session['authentication_attempts'] += 1
             # Adds invalid login attempts to the log file
