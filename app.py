@@ -132,14 +132,14 @@ class SecurityFilter(logging.Filter):
 
 
 # File handler setup
-file_handler = logging.FileHandler('lottery.log', 'a')
+"""file_handler = logging.FileHandler('lottery.log', 'a')
 file_handler.setLevel(logging.WARNING)
 file_handler.addFilter(SecurityFilter())
 formatter = logging.Formatter('%(asctime)s : %(message)s', '%m/%d/%Y %I:%M:%S %p')
 file_handler.setFormatter(formatter)
 
 logger = logging.getLogger()
-logger.addHandler(file_handler)
+logger.addHandler(file_handler)"""
 
 if __name__ == "__main__":
     # If it doesn't work add '--cert=cert.pem --key=key.pem' in Edit configuration/Additional options
