@@ -20,10 +20,7 @@ def admin():
 
 
 # create a new winning draw
-@admin_blueprint.route('/generate_winning_draw', methods=['POST'])
-@admin_blueprint.route('/admin')
-@login_required
-@requires_roles('admin')
+
 def generate_winning_draw():
     # get current winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True).first()
@@ -60,10 +57,7 @@ def generate_winning_draw():
 
 
 # view current winning draw
-@admin_blueprint.route('/view_winning_draw', methods=['POST'])
-@admin_blueprint.route('/admin')
-@login_required
-@requires_roles('admin')
+
 def view_winning_draw():
     # get winning draw from DB
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
@@ -84,10 +78,7 @@ def view_winning_draw():
 
 
 # view lottery results and winners
-@admin_blueprint.route('/run_lottery', methods=['POST'])
-@admin_blueprint.route('/admin')
-@login_required
-@requires_roles('admin')
+
 def run_lottery():
     # get current unplayed winning draw
     current_winning_draw = Draw.query.filter_by(master_draw=True, been_played=False).first()
@@ -151,20 +142,14 @@ def run_lottery():
 
 
 # view all registered users
-@admin_blueprint.route('/view_all_users', methods=['POST'])
-@admin_blueprint.route('/admin')
-@login_required
-@requires_roles('admin')
+
 def view_all_users():
     current_users = User.query.filter_by(role='user').all()
 
     return render_template('admin/admin.html', name=current_user.firstname, current_users=current_users)
 
 
-@admin_blueprint.route('/view_user_activity', methods=['POST'])
-@admin_blueprint.route('/admin')
-@login_required
-@requires_roles('admin')
+
 def view_user_activity():
     current_users_activity = User.query.filter_by(role='user').all()
 
